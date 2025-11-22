@@ -22,9 +22,9 @@ const Register = () => {
       <h2>Register</h2>
 
       <form onSubmit={handleSubmit}>
-        <input placeholder="Name" value={form.name} onChange={onChange} /><br />
-        <input placeholder="Email" value={form.email} onChange={onChange} /><br />
-        <input placeholder="Password" type="password" value={form.password} onChange={onChange} /><br />
+        <input name="name" placeholder="Name" value={form.name} onChange={onChange} /><br />
+        <input name="email" placeholder="Email" value={form.email} onChange={onChange} /><br />
+        <input name="password" placeholder="Password" type="password" value={form.password} onChange={onChange} /><br />
         <button>Register</button>
       </form>
     </div>

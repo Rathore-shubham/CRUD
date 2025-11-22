@@ -3,7 +3,7 @@ import { createContext, useState } from "react";
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem("token") || "");
 
     const login = (jwt) => {
@@ -22,3 +22,5 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     )
 }
+
+export default AuthProvider
