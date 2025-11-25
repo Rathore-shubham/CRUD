@@ -258,13 +258,18 @@ app.post("/hold-transfer", async (req, res) => {
 
 
 // Release settlement (pay sellers later)
+// urban company 
+// cutomer books service 1000
+// uc holds the cleaner payout due to complain
+// after 24 hour customer is happy, us releases the payout
 
 app.post("/release-transfer",async (req,res) => {
   try {
     const { transfer_id } = req.body;
 
-    const release = await razorpay.transfers.edit(transfer_id, {
-      on_hold: false
+    const release = await razorpay.transfers.edit(transfer_id, // the specific transfer u want to release
+      {
+      on_hold: false // means "send money now"
     });
 
     res.json(release)
@@ -278,14 +283,19 @@ app.post("/release-transfer",async (req,res) => {
 
 // REFUND SPLIT PAYMENTS
 // when user get a refund -- sellers money must also be reversed
+// Customer gets money back
+// Seller must also return their share
+// Commission/platform fee may or may not be refunded (your choice)
+// Because earlier you did a transfer to sellers.
 
 app.post("/refund", async (req, res) => {
   try {
     const { payment_id, amount } = req.body;
 
-    const refund = await razorpay.payments.refund(payment_id, {
-      amount: amount * 100,
-      speed: "optium"
+    const refund = await razorpay.payments.refund(payment_id, //cutomer's original payment
+    {
+      amount: amount * 100, // refund amount 
+      speed: "optimum" // refund speed ['normal', 'instant', 'optimum']
     })
 
     res.json(refund)
