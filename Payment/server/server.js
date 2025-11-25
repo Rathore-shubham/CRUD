@@ -147,20 +147,34 @@ app.post("/webhook", async (req, res) => {
 });
 
 
+
+// RAZORPAY ROUTE = MARKETPLACE SYSTEM
+
+// this is used when your platform collects money, then sends the money to sellers/ vendors/service-providers
+
+//this seller will receive money using razorpay route
+// Meesho --> home seller registers--meesho creates a linked account
+// zomato --> restaurant sign up -- its creates a linked  amount
+
+// meesho sellers onboarding
+// seller enters details --> meesho backend creates a linked account for them now razorpay knows the seller will receive money
+
+
+
 app.post("/create-linked-account", async (req, res) => {
   try {
     const { name, email, contact } = req.body;
 
     const account = await razorpay.accounts.create({
-      email,
-      phone: contact,
-      type: "managed",
-      legal_business_name: name,
-      business_type: "individual",
-      contact_name: name
+      email, // razor needs vendors email to register acc
+      phone: contact, // for KYC , notifi
+      type: "managed", // because marketplace controls the money flow
+      legal_business_name: name, // registeered name on documents
+      business_type: "individual",// indiv/proprietorship/company
+      contact_name: name //name of main person 
     });
 
-    res.json(account)
+    res.json(account) // u get a linked account_id
     
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -168,35 +182,45 @@ app.post("/create-linked-account", async (req, res) => {
 })
 
 
+// CREATE-ORDER
+// customer will pay money -- order is needed for payment checkout
+// swiggy -> customer buys food for 500 -> swiggy server creates an order --> payment happens
 app.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
 
     const order = await razorpay.orders.create({
-      amount: amount * 100,
-      currency: "INR",
-      receipt: "order_rcpt_" + Date.now()
+      amount: amount * 100, // total customer amount
+      currency: "INR",  //alwayss inr in india
+      receipt: "order_rcpt_" + Date.now() // for ur internal tracking
     });
 
-    res.json(order)
+    res.json(order) // order_id
     
   } catch (error) {
     res.status(500).json({ error: error.message})
   }
 })
 
+
+// CREATE-TRANSFER
+// after payment is captured - u send sellers share
+// meesho--
+// cutomer pays - 1000, platform keeps commission - 100 , seller receivss - 900 
+// transfer - send 900 to the sellers linked account
+
 app.post("/create-transfer", async (req, res) => {
   try {
     const { payment_id, amount, account_id } = req.body;
 
-    const transfer = await razorpay.payments.transfer(payment_id,
+    const transfer = await razorpay.payments.transfer(payment_id, // needed because money comes from this payment
       {
         transfer: [
           {
-            account: account_id,
-            amount: amount * 100,
+            account: account_id, // vendor who will receive money
+            amount: amount * 100, // amount to pay the vendor
             currency: "INR",
-            on_hold: false,
+            on_hold: false, // whether money should wait before sending
           }
         ]
       }
@@ -208,6 +232,32 @@ app.post("/create-transfer", async (req, res) => {
     res.status(500).json({ error: error.message})
   }
 })
+
+
+
+// HOLD-TRANSFER
+// put a transfer on hold (dont send it to the seller yet)
+// urban company --> cleaner did a bad job -> customer complains --> UC holds 700 payment --> doesnt give to cleaner until issue resolved
+app.post("/hold-transfer", async (req, res) => {
+  try {
+    const { transfer_id } = req.body;
+
+    const hold = await razorpay.transfers.edit(transfer_id, // the transfer u want to freeze
+      {
+        on_hold: true, //pause settlement to vendor
+        on_hold_until: Math.floor(Date.now() / 1000) + 86400, // release date timestamp
+      }
+    );
+
+    res.json(hold)
+    
+  } catch (error) {
+    res.status(500).json({error: error.message})
+  }
+});
+
+
+
 
 app.listen(5000, () => {
   console.log("server running on port 5000");
