@@ -257,6 +257,44 @@ app.post("/hold-transfer", async (req, res) => {
 });
 
 
+// Release settlement (pay sellers later)
+
+app.post("/release-transfer",async (req,res) => {
+  try {
+    const { transfer_id } = req.body;
+
+    const release = await razorpay.transfers.edit(transfer_id, {
+      on_hold: false
+    });
+
+    res.json(release)
+    
+  } catch (error) {
+    res.status(500).json({error: error.message})
+  }
+})
+
+
+
+// REFUND SPLIT PAYMENTS
+// when user get a refund -- sellers money must also be reversed
+
+app.post("/refund", async (req, res) => {
+  try {
+    const { payment_id, amount } = req.body;
+
+    const refund = await razorpay.payments.refund(payment_id, {
+      amount: amount * 100,
+      speed: "optium"
+    })
+
+    res.json(refund)
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message})
+  }
+})
+
 
 
 app.listen(5000, () => {
