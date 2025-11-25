@@ -146,6 +146,69 @@ app.post("/webhook", async (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+
+app.post("/create-linked-account", async (req, res) => {
+  try {
+    const { name, email, contact } = req.body;
+
+    const account = await razorpay.accounts.create({
+      email,
+      phone: contact,
+      type: "managed",
+      legal_business_name: name,
+      business_type: "individual",
+      contact_name: name
+    });
+
+    res.json(account)
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+
+app.post("/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const order = await razorpay.orders.create({
+      amount: amount * 100,
+      currency: "INR",
+      receipt: "order_rcpt_" + Date.now()
+    });
+
+    res.json(order)
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message})
+  }
+})
+
+app.post("/create-transfer", async (req, res) => {
+  try {
+    const { payment_id, amount, account_id } = req.body;
+
+    const transfer = await razorpay.payments.transfer(payment_id,
+      {
+        transfer: [
+          {
+            account: account_id,
+            amount: amount * 100,
+            currency: "INR",
+            on_hold: false,
+          }
+        ]
+      }
+    );
+
+    res.json(transfer)
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message})
+  }
+})
+
 app.listen(5000, () => {
   console.log("server running on port 5000");
 });
