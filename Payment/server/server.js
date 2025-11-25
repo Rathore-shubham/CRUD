@@ -209,6 +209,8 @@ app.post("/create-order", async (req, res) => {
 // cutomer pays - 1000, platform keeps commission - 100 , seller receivss - 900 
 // transfer - send 900 to the sellers linked account
 
+
+
 app.post("/create-transfer", async (req, res) => {
   try {
     const { payment_id, amount, account_id } = req.body;
