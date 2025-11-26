@@ -290,6 +290,16 @@ app.post("/release-transfer",async (req,res) => {
 // Commission/platform fee may or may not be refunded (your choice)
 // Because earlier you did a transfer to sellers.
 
+// 1️ Meesho
+// Customer buys a ₹1000 item.
+// Seller received ₹900 via transfer.
+// Customer returns the item.
+
+// Refund flow:
+// Customer gets back ₹1000
+// Razorpay auto pulls ₹900 back from seller
+// Platform fee reversed (optional)
+
 app.post("/refund", async (req, res) => {
   try {
     const { payment_id, amount } = req.body;
